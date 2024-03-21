@@ -35,4 +35,6 @@
  */
 dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.5.4-GTNH:dev")
+    //implementation("com.github.GTNewHorizons:Chisel:2.14.1-GTNH:dev")
+    implementation files('libs/Chisel-2.14.1-GTNH-dev.jar', 'libs/Chisel-2.14.1-GTNH-dev.jar')
 }
