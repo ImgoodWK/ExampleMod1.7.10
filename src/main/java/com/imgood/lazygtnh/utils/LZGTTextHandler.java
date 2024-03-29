@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.imgood.lazygtnh.LazyGTNH;
 import com.Nxer.TwistSpaceTechnology.util.LanguageUtil0;
+import com.imgood.lazygtnh.LazyGTNH;
 
 /**
  * When Texts need auto generate .lang . Use this.
@@ -122,12 +122,9 @@ public class LZGTTextHandler {
             // }
 
             /* Prepare the files. */
-            File en_US_lang = new File(
-                LazyGTNH.DevResource + "\\assets\\gtnhcommunitymod\\lang\\en_US.lang");
-            File zh_CN_lang = new File(
-                LazyGTNH.DevResource + "\\assets\\gtnhcommunitymod\\lang\\zh_CN.lang");
-            LazyGTNH.LOG
-                .info("File finder with en_US.lang catch a file absolutePath: " + en_US_lang.getAbsolutePath());
+            File en_US_lang = new File(LazyGTNH.DevResource + "\\assets\\gtnhcommunitymod\\lang\\en_US.lang");
+            File zh_CN_lang = new File(LazyGTNH.DevResource + "\\assets\\gtnhcommunitymod\\lang\\zh_CN.lang");
+            LazyGTNH.LOG.info("File finder with en_US.lang catch a file absolutePath: " + en_US_lang.getAbsolutePath());
             LazyGTNH.LOG.info("File finder with en_US.lang catch a file named: " + en_US_lang.getName());
 
             /* Write the new textLines in the end of the lang file. */
@@ -137,15 +134,13 @@ public class LZGTTextHandler {
                 FileWriter en_Us = new FileWriter(en_US_lang, true);
                 FileWriter zh_CN = new FileWriter(zh_CN_lang, true);
                 for (String key : LangMapNeedToWrite.keySet()) {
-                    LazyGTNH.LOG
-                        .info("en_US write a Line START: " + key + "===>" + LangMapNeedToWrite.get(key));
+                    LazyGTNH.LOG.info("en_US write a Line START: " + key + "===>" + LangMapNeedToWrite.get(key));
                     en_Us.write(key);
                     en_Us.write("=");
                     en_Us.write(LangMapNeedToWrite.get(key));
                     en_Us.write("\n");
                     LazyGTNH.LOG.info("en_US write a Line COMPLETE.");
-                    LazyGTNH.LOG
-                        .info("zh_CN write a Line START: " + key + "===>" + LangMapNeedToWrite.get(key));
+                    LazyGTNH.LOG.info("zh_CN write a Line START: " + key + "===>" + LangMapNeedToWrite.get(key));
                     zh_CN.write(key);
                     zh_CN.write("=");
                     zh_CN.write(LangMapNeedToWrite.get(key));

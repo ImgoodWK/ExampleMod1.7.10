@@ -1,23 +1,23 @@
 package com.imgood.lazygtnh;
 
-import com.cricketcraft.chisel.api.ChiselTabs;
-import com.imgood.lazygtnh.config.LazyGTNHConfigurations;
-import cpw.mods.fml.common.Loader;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemDye;
 import net.minecraftforge.oredict.OreDictionary;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import com.cricketcraft.chisel.api.ChiselTabs;
+import com.imgood.lazygtnh.client.render.SubmapManagerAntiblockFrameless;
+import com.imgood.lazygtnh.config.LazyGTNHConfigurations;
+
+import cpw.mods.fml.common.Loader;
 import team.chisel.Chisel;
 import team.chisel.block.BlockCarvable;
 import team.chisel.block.BlockCarvableGlowie;
-import com.imgood.lazygtnh.client.render.SubmapManagerAntiblockFrameless;
 import team.chisel.config.Configurations;
-import com.imgood.lazygtnh.LazyGTNH;
-
 
 public enum LazyGTNHFeatures {
+
     ANTIBLOCKFRAMELESS {
+
         @Override
         void addBlocks() {
             LazyGTNH.logger.info("Adding blocks:AntiblockFrameless");
@@ -29,7 +29,7 @@ public enum LazyGTNHFeatures {
             }
 
             for (int i = 0; i < 16; i++) {
-                LazyGTNH.logger.info("Adding blocks:AntiblockFrameless"+ItemDye.field_150921_b[i]+".desc");
+                LazyGTNH.logger.info("Adding blocks:AntiblockFrameless" + ItemDye.field_150921_b[i] + ".desc");
                 antiBlockFrameless.carverHelper.addVariation(
                     "tile.antiBlockFrameLess." + ItemDye.field_150921_b[i] + ".desc",
                     i,
@@ -40,9 +40,11 @@ public enum LazyGTNHFeatures {
             OreDictionary.registerOre("antiBlockFrameless", antiBlockFrameless);
         }
     };
+
     private LazyGTNHFeatures parent;
 
     private String requiredMod;
+
     static void preInit() {
         LazyGTNH.logger.info("Starting pre-init...");
         loadBlocks();
@@ -55,6 +57,7 @@ public enum LazyGTNHFeatures {
         loadRecipes();
         LazyGTNH.logger.info("Init finished.");
     }
+
     void addBlocks() {
         ;
     }
@@ -66,12 +69,12 @@ public enum LazyGTNHFeatures {
             LazyGTNH.logger.info("if enabled check");
             LazyGTNH.logger.info(f.enabled());
             LazyGTNH.logger.info(f);
-                f.addBlocks();
-                ++num;
+            f.addBlocks();
+            ++num;
         }
         LazyGTNH.logger.info(num + " Feature's blocks loaded.");
         LazyGTNH.logger.info("Loading Tile Entities...");
-        //Chisel.proxy.registerTileEntities();
+        // 。。。
         LazyGTNH.logger.info("Tile Entities loaded.");
     }
 
@@ -101,9 +104,11 @@ public enum LazyGTNHFeatures {
                 LazyGTNHConfigurations.featureName(f),
                 f.getRequiredMod());
         } else {
-            Chisel.logger.info("Skipping feature {} as it was disabled in the config.", LazyGTNHConfigurations.featureName(f));
+            Chisel.logger
+                .info("Skipping feature {} as it was disabled in the config.", LazyGTNHConfigurations.featureName(f));
         }
     }
+
     void addItems() {
         ;
     }
@@ -111,6 +116,7 @@ public enum LazyGTNHFeatures {
     private final boolean hasParentFeature() {
         return parent == null || parent.enabled();
     }
+
     public boolean enabled() {
         return LazyGTNHConfigurations.featureEnabled(this) && hasRequiredMod() && hasParentFeature();
     }
@@ -124,6 +130,7 @@ public enum LazyGTNHFeatures {
     }
 
     private static int meta = 0;
+
     private static void loadRecipes() {
         Chisel.logger.info("Loading recipes...");
         int num = 0;

@@ -1,16 +1,18 @@
 package com.imgood.lazygtnh.config;
 
-import com.imgood.lazygtnh.LazyGTNHFeatures;
-import net.minecraft.item.ItemDye;
-import net.minecraftforge.common.config.Configuration;
-import org.apache.commons.lang3.StringUtils;
-import team.chisel.Chisel;
-import team.chisel.Features;
-import team.chisel.ctmlib.CTM;
-
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import net.minecraft.item.ItemDye;
+import net.minecraftforge.common.config.Configuration;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.imgood.lazygtnh.LazyGTNHFeatures;
+
+import team.chisel.Chisel;
+import team.chisel.ctmlib.CTM;
 
 public class LazyGTNHConfigurations {
 

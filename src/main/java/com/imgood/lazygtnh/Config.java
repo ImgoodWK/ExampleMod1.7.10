@@ -5,6 +5,7 @@ import java.io.File;
 import net.minecraftforge.common.config.Configuration;
 
 public class Config {
+
     // region ThermalEnergyDevourer
     public static byte Mode_Default_HyperdimensionalResonanceEvolver = 0;
     public static int Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver = 1024;

@@ -1,4 +1,5 @@
 package com.imgood.lazygtnh.client.render;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -18,6 +19,7 @@ import team.chisel.ctmlib.TextureSubmap;
 import team.chisel.init.ChiselBlocks;
 
 public class SubmapManagerAntiblockFrameless extends SubmapManagerBase {
+
     @SideOnly(Side.CLIENT)
     public static class AntiblockItemRenderer implements IItemRenderer {
 

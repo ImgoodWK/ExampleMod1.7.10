@@ -1,9 +1,12 @@
 package com.imgood.lazygtnh;
 
-import com.imgood.lazygtnh.loader.MachineLoader;
-import com.imgood.lazygtnh.utils.LZGTTextHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.imgood.lazygtnh.loader.MachineLoader;
+import com.imgood.lazygtnh.loader.RecipeLoader;
+import com.imgood.lazygtnh.nei.NEIHandler;
+import com.imgood.lazygtnh.utils.LZGTTextHandler;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -40,6 +43,8 @@ public class LazyGTNH {
         LOG.info("Lazy GTNH initialization");
         LazyGTNHFeatures.init();
         MachineLoader.loadMachines();
+        RecipeLoader.loadRecipes();
+        NEIHandler.IMCSender();
         proxy.init(event);
     }
 
@@ -51,7 +56,6 @@ public class LazyGTNH {
         proxy.postInit(event);
     }
 
-    @Mod.EventHandler
     // register server commands in this event handler (Remove if not needed)
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
