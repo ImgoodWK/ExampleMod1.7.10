@@ -3,6 +3,7 @@ package com.imgood.lazygtnh;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.imgood.lazygtnh.block.textures.TexturesGtBlock;
 import com.imgood.lazygtnh.loader.MachineLoader;
 import com.imgood.lazygtnh.loader.RecipeLoader;
 import com.imgood.lazygtnh.nei.NEIHandler;
@@ -11,11 +12,18 @@ import com.imgood.lazygtnh.utils.LZGTTextHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
-@Mod(modid = LazyGTNH.MODID, version = Tags.VERSION, name = "LazyGTNH", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(
+    modid = LazyGTNH.MODID,
+    version = Tags.VERSION,
+    name = "LazyGTNH",
+    acceptedMinecraftVersions = "[1.7.10]",
+    dependencies = "before:eternalsingularity")
+
 public class LazyGTNH {
 
     public static final String MOD_NAME = "LazyGTNH";
@@ -31,7 +39,7 @@ public class LazyGTNH {
     // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
     // GameRegistry." (Remove if not needed)
     public void preInit(FMLPreInitializationEvent event) {
-        LOG.info("Lazy GTNH preinitialization");
+        logger.info("Lazy GTNH preinitialization");
         LazyGTNHFeatures.preInit();
         LZGTTextHandler.initLangMap(isInDevMode);
         proxy.preInit(event);
@@ -40,24 +48,36 @@ public class LazyGTNH {
     @Mod.EventHandler
     // load "Do your mod setup. Build whatever data structures you care about. Register recipes." (Remove if not needed)
     public void init(FMLInitializationEvent event) {
-        LOG.info("Lazy GTNH initialization");
-        LazyGTNHFeatures.init();
+        logger.info("Lazy GTNH initialization");
         MachineLoader.loadMachines();
-        RecipeLoader.loadRecipes();
+        // RecipeLoader.loadRecipes();
         NEIHandler.IMCSender();
         proxy.init(event);
+        logger.info(
+            "Loading Textrues" + TexturesGtBlock.HyperDimensionalResonanceEvolverField.getTextureFile()
+                .getResourcePath());
     }
 
     @Mod.EventHandler
     // postInit "Handle interaction with other mods, complete your setup based on this." (Remove if not needed)
     public void postInit(FMLPostInitializationEvent event) {
+
         MachineLoader.loadMachinePostInit();
         LZGTTextHandler.serializeLangMap(isInDevMode);
+        LazyGTNHFeatures.init();
+
         proxy.postInit(event);
     }
 
     // register server commands in this event handler (Remove if not needed)
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
+    }
+
+    @Mod.EventHandler
+    public void onLoadCompleteEvent(FMLLoadCompleteEvent event) {
+        // Your post-load initialization code here
+        logger.info("testmsgLoadc omplete test");
+        RecipeLoader.loadRecipes();
     }
 }

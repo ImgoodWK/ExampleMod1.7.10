@@ -32,7 +32,6 @@ public class HyperdimensionalResonanceEvolverRecipePool implements IRecipePool {
 
             )
             .itemOutputs(
-                new ItemStack[]{
                     new ItemStack(GameRegistry.findItem("eternalsingularity","eternal_singularity"),1),
                     new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,0),
                     new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,1),
@@ -49,8 +48,7 @@ public class HyperdimensionalResonanceEvolverRecipePool implements IRecipePool {
                     new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,12),
                     new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,13),
                     new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,14),
-                    new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,15),
-                }
+                    new ItemStack(GameRegistry.findItem("eternalsingularity","combined_singularity"),1,15)
             )
             .specialValue(11700)
             .eut(RECIPE_MAX)
@@ -75,5 +73,6 @@ public class HyperdimensionalResonanceEvolverRecipePool implements IRecipePool {
             .addTo(HRE);
 
     }
+
     // spotless:on
 }

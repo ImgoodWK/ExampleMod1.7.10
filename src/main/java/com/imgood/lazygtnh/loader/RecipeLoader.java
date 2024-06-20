@@ -10,7 +10,7 @@ public class RecipeLoader {
         IRecipePool[] recipePools = new IRecipePool[] { new HyperdimensionalResonanceEvolverRecipePool() };
 
         for (IRecipePool recipePool : recipePools) {
-            LazyGTNH.LOG.info("Loading recipes:" + recipePool);
+            LazyGTNH.logger.info("Loading recipes:" + recipePool);
             recipePool.loadRecipes();
         }
 

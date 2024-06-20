@@ -13,14 +13,14 @@ import gregtech.common.gui.modularui.UIHelper;
 public class LZGT_GeneralFrontend extends RecipeMapFrontend {
 
     private static final int xDirMaxCount = 4;
-    private static final int yOrigin = 8;
+    private static final int yOrigin = 16;
     private final int itemRowCount;
 
     public LZGT_GeneralFrontend(BasicUIPropertiesBuilder uiPropertiesBuilder,
         NEIRecipePropertiesBuilder neiPropertiesBuilder) {
-        super(uiPropertiesBuilder.logoPos(new Pos2d(79, 7)), neiPropertiesBuilder);
+        super(uiPropertiesBuilder.logoPos(new Pos2d(79, 15)), neiPropertiesBuilder);
         this.itemRowCount = getItemRowCount();
-        neiProperties.recipeBackgroundSize = new Size(170, 10 + (itemRowCount + getFluidRowCount()) * 18);
+        neiProperties.recipeBackgroundSize = new Size(170, 20 + (itemRowCount + getFluidRowCount()) * 18);
     }
 
     private int getItemRowCount() {

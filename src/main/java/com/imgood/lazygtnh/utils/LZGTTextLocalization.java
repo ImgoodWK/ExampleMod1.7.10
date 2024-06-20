@@ -7,7 +7,7 @@ import net.minecraft.util.EnumChatFormatting;
 // spotless:off
 
 /**
- * Use {@link com.Nxer.TwistSpaceTechnology.util.TextEnums}
+ * Use {@link com.imgood.lazygtnh.utils.Enums}
  * <p>See <a href="https://github.com/Nxer/Twist-Space-Technology-Mod/pull/284">This PR: Use a preprocessor to help complete the creation of language files</a>
  */
 @Deprecated
@@ -34,6 +34,14 @@ public class LZGTTextLocalization {
     public static final String Tooltip_HyperdimensionalResonanceEvolver_14 = texter("Progress time is fixed at 6.4s .", "Tooltip_HyperdimensionalResonanceEvolver_14");
     public static final String Tooltip_HyperdimensionalResonanceEvolver_2_01 = texter("Check whether turn into Wireless mode when checking structure.", "Tooltip_HyperdimensionalResonanceEvolver_2_01");
     // endregion
+    public static final String Tooltip_DoNotNeedMaintenance = texter("Do Not Need Maintenance!", "Tooltip_DoNotNeedMaintenance");;
+    public static final String BLUE_PRINT_INFO = texter("Follow the" + EnumChatFormatting.BLUE + " Structure" + EnumChatFormatting.DARK_BLUE + "Lib" + EnumChatFormatting.GRAY + " hologram projector to build the main structure.", "BLUE_PRINT_INFO");
+    public static final String StructureTooComplex = texter("The structure is too complex!", "StructureTooComplex");
+    public static final String textScrewdriverChangeMode = texter("Use screwdriver to change mode.", "textScrewdriverChangeMode");
+    public static final String textFrontBottom = texter("Front bottom", "textFrontBottom");
+    public static final String textUseBlueprint = texter("Use " + EnumChatFormatting.BLUE + "Blue" + EnumChatFormatting.AQUA + "print" + EnumChatFormatting.RESET + " to preview", "textUseBlueprint");
+    public static Object Waila_WirelessMode = texter("Wireless Mode", "Waila.General.WirelessMode");
+    public static Object Waila_CurrentEuCost = texter("Current EU Cost", "Waila.General.CurrentEuCost");
 }
 
 // spotless:on

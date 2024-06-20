@@ -33,8 +33,8 @@ public class LZGT_Recipe extends GT_Recipe {
         // At the same time , the localization key of the NEI Name
         // of this page.
         .of("lzgt.recipe.HyperdimensionalResonanceEvolverRecipes")
-        .maxIO(16, 16, 4, 8)
-        .progressBar(GT_UITextures.PROGRESSBAR_MIXER)
+        .maxIO(32, 32, 4, 4)
+        .progressBar(GT_UITextures.PROGRESSBAR_ARROW_MULTIPLE)
         .neiHandlerInfo(builder -> builder.setDisplayStack(LZGT_ItemList.HyperdimensionalResonanceEvolver.get(1)))
         .disableOptimize()
         .frontend(LZGT_GeneralFrontend::new)

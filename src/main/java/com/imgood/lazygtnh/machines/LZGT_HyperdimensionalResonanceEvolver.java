@@ -1,46 +1,55 @@
 package com.imgood.lazygtnh.machines;
 
-import static com.Nxer.TwistSpaceTechnology.util.TextHandler.texter;
-import static com.Nxer.TwistSpaceTechnology.util.TextLocalization.Tooltip_DoNotNeedMaintenance;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.transpose;
+import static com.imgood.lazygtnh.block.textures.TexturesGtBlock.HyperDimensionalResonanceEvolverField;
+import static com.imgood.lazygtnh.utils.LZGTTextLocalization.Tooltip_DoNotNeedMaintenance;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_OFF;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_ON;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_FUSION1_GLOW;
 import static gregtech.api.enums.Textures.BlockIcons.casingTexturePages;
 import static gregtech.common.misc.WirelessNetworkManager.addEUToGlobalEnergyMap;
-import static net.minecraft.util.StatCollector.translateToLocalFormatted;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.Nxer.TwistSpaceTechnology.common.machine.multiMachineClasses.GTCM_MultiMachineBase;
-import com.Nxer.TwistSpaceTechnology.common.machine.multiMachineClasses.processingLogics.GTCM_ProcessingLogic;
 import com.Nxer.TwistSpaceTechnology.util.TextLocalization;
-import com.Nxer.TwistSpaceTechnology.util.Utils;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
+import com.imgood.lazygtnh.machines.multiMachineClasses.LZGT_MultiMachineBase;
+import com.imgood.lazygtnh.machines.processingLogics.LZGT_ProcessingLogic;
 import com.imgood.lazygtnh.recipemap.LZGT_RecipeMap;
+import com.imgood.lazygtnh.utils.LZGTTextHandler;
 import com.imgood.lazygtnh.utils.LZGTTextLocalization;
+import com.imgood.lazygtnh.utils.Utils;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import gregtech.api.enums.GT_HatchElement;
 import gregtech.api.enums.ItemList;
+import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -49,6 +58,7 @@ import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.render.TextureFactory;
+import gregtech.api.util.GT_HatchElementBuilder;
 import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
 import gregtech.api.util.GT_OverclockCalculator;
 import gregtech.api.util.GT_Recipe;
@@ -56,10 +66,27 @@ import gregtech.api.util.GT_Utility;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
+/**
+ * @author Imgood
+ */
 public class LZGT_HyperdimensionalResonanceEvolver
-    extends GTCM_MultiMachineBase<LZGT_HyperdimensionalResonanceEvolver> {
+    extends LZGT_MultiMachineBase<LZGT_HyperdimensionalResonanceEvolver> {
 
-    // region Class Constructor
+    /**
+     * 0 = high speed mode
+     * <p>
+     * 1 = high parallel mode
+     */
+    private byte mode = ValueEnum.Mode_Default_HyperdimensionalResonanceEvolver;
+    private int coefficientMultiplier = 1;
+    private boolean isWirelessMode = true;
+    private UUID ownerUUID;
+    private long costingWirelessEUTemp = 0;
+
+    private int CASING_INDEX1 = 183;
+
+    private int mCasing;
+
     public LZGT_HyperdimensionalResonanceEvolver(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
@@ -72,20 +99,6 @@ public class LZGT_HyperdimensionalResonanceEvolver
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
         return new LZGT_HyperdimensionalResonanceEvolver(this.mName);
     }
-    // endregion
-
-    // region Processing Logic
-
-    /**
-     * 0 = high speed mode
-     * <p>
-     * 1 = high parallel mode
-     */
-    private byte mode = ValueEnum.Mode_Default_HyperdimensionalResonanceEvolver;
-    private int coefficientMultiplier = 1;
-    private boolean isWirelessMode = true;
-    private UUID ownerUUID;
-    private long costingWirelessEUTemp = 0;
 
     @Override
     public void getWailaBody(ItemStack itemStack, List<String> currentTip, IWailaDataAccessor accessor,
@@ -104,8 +117,8 @@ public class LZGT_HyperdimensionalResonanceEvolver
                     + " EU");
         } else {
             currentTip.add(
-                EnumChatFormatting.GOLD
-                    + translateToLocalFormatted("HyperdimensionalResonanceEvolver.modeMsg." + tag.getByte("mode")));
+                EnumChatFormatting.GOLD + StatCollector
+                    .translateToLocalFormatted("ThermalEnergyDevourer.modeMsg." + tag.getByte("mode"), new Object[0]));
         }
     }
 
@@ -126,8 +139,8 @@ public class LZGT_HyperdimensionalResonanceEvolver
         String[] origin = super.getInfoData();
         String[] ret = new String[origin.length + 1];
         System.arraycopy(origin, 0, ret, 0, origin.length);
-        ret[origin.length] = EnumChatFormatting.AQUA
-            + texter("Coefficient Multiplier", "MachineInfoData.HyperdimensionalResonanceEvolver.coefficientMultiplier")
+        ret[origin.length] = EnumChatFormatting.AQUA + LZGTTextHandler
+            .texter("Coefficient Multiplier", "MachineInfoData.HyperdimensionalResonanceEvolver.coefficientMultiplier")
             + ": "
             + EnumChatFormatting.GOLD
             + this.coefficientMultiplier;
@@ -164,7 +177,7 @@ public class LZGT_HyperdimensionalResonanceEvolver
 
     @Override
     protected ProcessingLogic createProcessingLogic() {
-        return new GTCM_ProcessingLogic() {
+        return new LZGT_ProcessingLogic() {
 
             @NotNull
             @Override
@@ -190,7 +203,7 @@ public class LZGT_HyperdimensionalResonanceEvolver
     protected void setProcessingLogicPower(ProcessingLogic logic) {
         if (isWirelessMode) {
             // wireless mode ignore voltage limit
-            logic.setAvailableVoltage(Long.MAX_VALUE);
+            logic.setAvailableVoltage(0);
             logic.setAvailableAmperage(1);
             logic.setAmperageOC(false);
         } else {
@@ -246,6 +259,7 @@ public class LZGT_HyperdimensionalResonanceEvolver
     @Override
     public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
         super.onFirstTick(aBaseMetaTileEntity);
+
         this.ownerUUID = aBaseMetaTileEntity.getOwnerUuid();
     }
 
@@ -306,11 +320,16 @@ public class LZGT_HyperdimensionalResonanceEvolver
         return 10;
     }
     private static final String STRUCTURE_PIECE_MAIN = "mainHyperdimensionalResonanceEvolver";
-    private static IStructureDefinition<LZGT_HyperdimensionalResonanceEvolver> STRUCTURE_DEFINITION = null;
+    private IStructureDefinition<LZGT_HyperdimensionalResonanceEvolver> STRUCTURE_DEFINITION = null;
 
     @Override
     public void construct(ItemStack stackSize, boolean hintsOnly) {
         buildPiece(STRUCTURE_PIECE_MAIN, stackSize, hintsOnly, horizontalOffSet, verticalOffSet, depthOffSet);
+    }
+
+    @Override
+    public boolean addToMachineList(IGregTechTileEntity aTileEntity, int aBaseCasingIndex) {
+        return super.addToMachineList(aTileEntity, aBaseCasingIndex) || this.addExoticEnergyInputToMachineList(aTileEntity, aBaseCasingIndex);
     }
     @Override
     public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
@@ -319,12 +338,13 @@ public class LZGT_HyperdimensionalResonanceEvolver
         }
         return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, horizontalOffSet, verticalOffSet, depthOffSet, elementBudget, env, false, true);
     }
+
     @Override
     public IStructureDefinition<LZGT_HyperdimensionalResonanceEvolver> getStructureDefinition() {
         if (STRUCTURE_DEFINITION == null) {
             STRUCTURE_DEFINITION = StructureDefinition
                 .<LZGT_HyperdimensionalResonanceEvolver>builder()
-                .addShape(STRUCTURE_PIECE_MAIN, transpose(new String[][]{    {"                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               C                       C               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               C                       C               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       "},
+                .addShape("mainHyperdimensionalResonanceEvolver", transpose(new String[][]{    {"                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               C                       C               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               C                       C               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       "},
                     {"                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               F                       F               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","  A                                                 A  ","  A                                                 A  ","  A                                                 A  ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               F                       F               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                          AAA                          ","                                                       ","                                                       "},
                     {"                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               F                       F               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","  A                                                 A  ","  H                                                 H  ","  I                                                 I  ","  H                                                 H  ","  A                                                 A  ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               F                       F               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                         AHIHA                         ","                                                       ","                                                       "},
                     {"                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               F                       F               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","  A                                                 A  "," AF                                                 FA "," AF                                                 FA "," AF                                                 FA ","  A                                                 A  ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","               F                       F               ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                         AFFFA                         ","                          AAA                          ","                                                       "},
@@ -370,22 +390,50 @@ public class LZGT_HyperdimensionalResonanceEvolver
                     {"                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                        AAAAAAA                        ","                     AAABBAKABBAAA                     ","                   AABBBEEAKAEEBBBAA                   ","                  ABBEEE  AKA  EEEBBA                  ","                 ABEE     A A     EEBA                 ","                ABE     AAAAAAA     EBA                ","               ABE    AA  A A  AA    EBA               ","              ABE    A    A A    A    EBA              ","              ABE   A     A A     A   EBA              ","             ABE   A     AA AA     A   EBA             ","             ABE  A     AAA AAA     A  EBA             ","             ABE  A    AA     AA    A  EBA             ","            ABE  A    AA       AA    A  EBA            ","            ABE  A   AA         AA   A  EBA            ","            AAAAAAAAAAA         AAAAAAAAAAA            ","            A    A                   A    A            ","            AAAAAAAAAAA         AAAAAAAAAAA            ","            ABE  A   AA         AA   A  EBA            ","            ABE  A    AA       AA    A  EBA            ","             ABE  A    AA     AA    A  EBA             ","             ABE  A     AAA AAA     A  EBA             ","             ABE   A     AA AA     A   EBA             ","              ABE   A     A A     A   EBA              ","              ABE    A    A A    A    EBA              ","               ABE    AA  A A  AA    EBA               ","                ABE     AAAAAAA     EBA                ","                 ABEE     A A     EEBA                 ","                  ABBEEE  A A  EEEBBA                  ","                   AABBBEEA AEEBBBAA                   ","                     AAABBA ABBAAA                     ","                        AAAAAAA                        ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       ","                                                       "}
 
                 }))
-                .addElement('A', ofBlock(Block.getBlockFromName("gregtech:gt.blockcasings"),12))
-                .addElement('B', ofBlock(Block.getBlockFromName("gregtech:gt.blockcasings"),13))
-                .addElement('C', ofBlock(Block.getBlockFromName("gregtech:gt.blockcasings"),14))
-                .addElement('D', ofBlock(Block.getBlockFromName("gregtech:gt.blockcasings5"),13))
-                .addElement('E', ofBlock(Block.getBlockFromName("tectech:gt.blockcasingsBA0"),12))
-                .addElement('F', ofBlock(Block.getBlockFromName("tectech:gt.blockcasingsTT"),11))
-                .addElement('G', ofBlock(Block.getBlockFromName("tectech:gt.spacetime_compression_field_generator"),8))
-                .addElement('H', ofBlock(Block.getBlockFromName("tectech:gt.stabilisation_field_generator"),8))
-                .addElement('I', ofBlock(Block.getBlockFromName("tectech:gt.time_acceleration_field_generator"),8))
-                .addElement('J', ofBlock(Block.getBlockFromName("lazygtnh:antiBlockFrameless"),6))
-                .addElement('K', ofBlock(Block.getBlockFromName("tectech:tile.quantumGlass"),0))
-                .addElement('L', ofBlock(Block.getBlockFromName("gregtech:gt.blockmachines"),10000))
+                //WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    .addElement('A', GT_HatchElementBuilder.<LZGT_HyperdimensionalResonanceEvolver>builder()
+                    .atLeast(new IHatchElement[]{GT_HatchElement.InputBus, GT_HatchElement.OutputBus})
+                    //.adder(<LZGT_HyperdimensionalResonanceEvolver::addToMachineList)
+                    .casingIndex(49)
+                    .dot(2)
+                    .buildAndChain(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")), 12))
+                //.addElement('A', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")), 12))
+                /*.addElement('A', GT_StructureUtility.buildHatchAdder(LZGT_HyperdimensionalResonanceEvolver.class)
+                    .atLeast(new IHatchElement[]{
+                        GT_HatchElement.InputBus,
+                        GT_HatchElement.OutputBus,
+                        GT_HatchElement.Maintenance,
+                        GT_HatchElement.Energy,
+                        GT_HatchElement.Muffler,
+                        GT_HatchElement.InputHatch,
+                        GT_HatchElement.OutputHatch
+                    })
+                    .casingIndex(CASING_INDEX1)
+                    .dot(1)
+                    .buildAndChain(new IStructureElement[]{
+                        StructureUtility.onElementPass((x) -> {
+                            ++x.mCasing;
+                        }, StructureUtility.ofBlock(ModBlocks.blockCasings3Misc, 2))
+                    })
+                )*/
+                .addElement('B', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")),13))
+                .addElement('C', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")),14))
+                .addElement('D', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings5")),13))
+                .addElement('E', ofBlock(Objects.requireNonNull(Block.getBlockFromName("tectech:gt.blockcasingsBA0")),12))
+                .addElement('F', ofBlock(Objects.requireNonNull(Block.getBlockFromName("tectech:gt.blockcasingsTT")),11))
+                .addElement('G', ofBlock(Objects.requireNonNull(Block.getBlockFromName("tectech:gt.spacetime_compression_field_generator")),8))
+                .addElement('H', ofBlock(Objects.requireNonNull(Block.getBlockFromName("tectech:gt.stabilisation_field_generator")),8))
+                .addElement('I', ofBlock(Objects.requireNonNull(Block.getBlockFromName("tectech:gt.time_acceleration_field_generator")),8))
+                .addElement('J', ofBlock(Objects.requireNonNull(Block.getBlockFromName("lazygtnh:antiBlockFrameless")),6))
+                .addElement('K', ofBlock(Objects.requireNonNull(Block.getBlockFromName("tectech:tile.quantumGlass")),0))
+                .addElement('L', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockmachines")),10000))
                 .build();
         }
+
         return STRUCTURE_DEFINITION;
     }
+
+
 
 /*
 Blocks:
@@ -426,19 +474,19 @@ F -> ofFrame...(Materials.NaquadahAlloy);
             .addInfo(LZGTTextLocalization.Tooltip_HyperdimensionalResonanceEvolver_12)
             .addInfo(LZGTTextLocalization.Tooltip_HyperdimensionalResonanceEvolver_13)
             .addInfo(LZGTTextLocalization.Tooltip_HyperdimensionalResonanceEvolver_14)
-            .addInfo(TextLocalization.textScrewdriverChangeMode)
+            .addInfo(LZGTTextLocalization.textScrewdriverChangeMode)
             .addSeparator()
-            .addInfo(TextLocalization.StructureTooComplex)
-            .addInfo(TextLocalization.BLUE_PRINT_INFO)
+            .addInfo(LZGTTextLocalization.StructureTooComplex)
+            .addInfo(LZGTTextLocalization.BLUE_PRINT_INFO)
             .addStructureInfo(LZGTTextLocalization.Tooltip_HyperdimensionalResonanceEvolver_2_01)
             .addStructureInfo(Tooltip_DoNotNeedMaintenance)
             .beginStructureBlock(15, 37, 15, false)
-            .addController(TextLocalization.textFrontBottom)
-            .addInputHatch(TextLocalization.textUseBlueprint, 1)
-            .addOutputHatch(TextLocalization.textUseBlueprint, 1)
-            .addInputBus(TextLocalization.textUseBlueprint, 1)
-            .addOutputBus(TextLocalization.textUseBlueprint, 1)
-            .addEnergyHatch(TextLocalization.textUseBlueprint, 2)
+            .addController(LZGTTextLocalization.textFrontBottom)
+            .addInputHatch(LZGTTextLocalization.textUseBlueprint, 1)
+            .addOutputHatch(LZGTTextLocalization.textUseBlueprint, 1)
+            .addInputBus(LZGTTextLocalization.textUseBlueprint, 1)
+            .addOutputBus(LZGTTextLocalization.textUseBlueprint, 1)
+            .addEnergyHatch(LZGTTextLocalization.textUseBlueprint, 2)
             .toolTipFinisher(LZGTTextLocalization.ModName);
         return tt;
     }
@@ -474,4 +522,207 @@ F -> ofFrame...(Materials.NaquadahAlloy);
         }
         return rTexture;
     }
+
+    @SideOnly(Side.CLIENT)
+    private void renderField(double x, double y, double z, int side, double minU, double maxU, double minV,
+        double maxV) {
+        // Field height
+        double fieldHeight = 32.0;
+        // Offset
+        y += 20;
+        switch (this.getExtendedFacing()) {
+            case NORTH_NORMAL_NONE:
+                z += 7;
+                break;
+            case SOUTH_NORMAL_NONE:
+                z -= 7;
+                break;
+            case EAST_NORMAL_NONE:
+                x -= 7;
+                break;
+            case WEST_NORMAL_NONE:
+                x += 7;
+                break;
+        }
+        Tessellator tes = Tessellator.instance;
+        switch (side) {
+            case 0:
+                tes.addVertexWithUV(x + 3.0, y, z + 7.0, maxU, maxV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z + 7.0, maxU, minV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z + 7.0, minU, minV);
+                tes.addVertexWithUV(x - 3.0, y, z + 7.0, minU, maxV);
+                tes.addVertexWithUV(x - 3.0, y, z + 7.0, minU, maxV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z + 7.0, minU, minV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z + 7.0, maxU, minV);
+                tes.addVertexWithUV(x + 3.0, y, z + 7.0, maxU, maxV);
+                break;
+            case 1:
+                tes.addVertexWithUV(x + 7.0, y, z + 4.0, maxU, maxV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z + 4.0, maxU, minV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x + 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x + 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z + 4.0, maxU, minV);
+                tes.addVertexWithUV(x + 7.0, y, z + 4.0, maxU, maxV);
+                break;
+            case 2:
+                tes.addVertexWithUV(x + 3.0, y, z - 7.0, maxU, maxV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z - 7.0, maxU, minV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z - 7.0, minU, minV);
+                tes.addVertexWithUV(x - 3.0, y, z - 7.0, minU, maxV);
+                tes.addVertexWithUV(x - 3.0, y, z - 7.0, minU, maxV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z - 7.0, minU, minV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z - 7.0, maxU, minV);
+                tes.addVertexWithUV(x + 3.0, y, z - 7.0, maxU, maxV);
+                break;
+            case 3:
+                tes.addVertexWithUV(x - 7.0, y, z + 4.0, maxU, maxV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z + 4.0, maxU, minV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x - 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x - 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z + 4.0, maxU, minV);
+                tes.addVertexWithUV(x - 7.0, y, z + 4.0, maxU, maxV);
+                break;
+            case 4:
+                tes.addVertexWithUV(x - 3.0, y, z + 7.0, maxU, maxV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z + 7.0, maxU, minV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z + 4.0, minU, minV);
+                tes.addVertexWithUV(x - 7.0, y, z + 4.0, minU, maxV);
+                tes.addVertexWithUV(x - 7.0, y, z + 4.0, minU, maxV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z + 4.0, minU, minV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z + 7.0, maxU, minV);
+                tes.addVertexWithUV(x - 3.0, y, z + 7.0, maxU, maxV);
+                break;
+            case 5:
+                tes.addVertexWithUV(x - 3.0, y, z - 7.0, maxU, maxV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z - 7.0, maxU, minV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x - 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x - 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x - 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x - 3.0, y + fieldHeight, z - 7.0, maxU, minV);
+                tes.addVertexWithUV(x - 3.0, y, z - 7.0, maxU, maxV);
+                break;
+            case 6:
+                tes.addVertexWithUV(x + 3.0, y, z + 7.0, maxU, maxV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z + 7.0, maxU, minV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z + 4.0, minU, minV);
+                tes.addVertexWithUV(x + 7.0, y, z + 4.0, minU, maxV);
+                tes.addVertexWithUV(x + 7.0, y, z + 4.0, minU, maxV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z + 4.0, minU, minV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z + 7.0, maxU, minV);
+                tes.addVertexWithUV(x + 3.0, y, z + 7.0, maxU, maxV);
+                break;
+            case 7:
+                tes.addVertexWithUV(x + 3.0, y, z - 7.0, maxU, maxV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z - 7.0, maxU, minV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x + 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x + 7.0, y, z - 4.0, minU, maxV);
+                tes.addVertexWithUV(x + 7.0, y + fieldHeight, z - 4.0, minU, minV);
+                tes.addVertexWithUV(x + 3.0, y + fieldHeight, z - 7.0, maxU, minV);
+                tes.addVertexWithUV(x + 3.0, y, z - 7.0, maxU, maxV);
+        }
+
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean renderInWorld(IBlockAccess aWorld, int x, int y, int z, Block block, RenderBlocks renderer) {
+        Tessellator tes = Tessellator.instance;
+        IIcon hre = HyperDimensionalResonanceEvolverField.getIcon();
+
+        // if (this.getBaseMetaTileEntity().isActive()) {
+        if (true) {
+            double minU = (double) hre.getMinU();
+            double maxU = (double) hre.getMaxU();
+            double minV = (double) hre.getMinV();
+            double maxV = (double) hre.getMaxV();
+            double xBaseOffset = (double) (3 * this.getExtendedFacing()
+                .getRelativeBackInWorld().offsetX);
+            double zBaseOffset = (double) (3 * this.getExtendedFacing()
+                .getRelativeBackInWorld().offsetZ);
+            tes.setColorOpaque_F(1.0F, 1.0F, 1.0F);
+            tes.setBrightness(15728880);
+
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                0,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                1,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                2,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                3,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                4,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                5,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                6,
+                minU,
+                maxU,
+                minV,
+                maxV);
+            this.renderField(
+                (double) x + xBaseOffset + 0.5,
+                (double) y,
+                (double) z + zBaseOffset + 0.5,
+                7,
+                minU,
+                maxU,
+                minV,
+                maxV);
+        }
+
+        return false;
+    }
+
 }
