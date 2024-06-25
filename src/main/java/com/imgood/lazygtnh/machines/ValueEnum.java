@@ -1,6 +1,6 @@
 package com.imgood.lazygtnh.machines;
 
-import com.imgood.lazygtnh.Config;
+import com.imgood.lazygtnh.config.LazyGTNHConfigurations;
 
 /**
  * ValueEnum are stored here.
@@ -8,10 +8,10 @@ import com.imgood.lazygtnh.Config;
 public final class ValueEnum {
 
     // region HyperdimensionalResonanceEvolver
-    public static final byte Mode_Default_HyperdimensionalResonanceEvolver = Config.Mode_Default_HyperdimensionalResonanceEvolver;
-    public static final int Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver = Config.Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver;
-    public static final int Parallel_HighParallelMode_HyperdimensionalResonanceEvolver = Config.Parallel_HighParallelMode_HyperdimensionalResonanceEvolver;
-    public static final int TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver = Config.TickPerProgressing_WirelessMode_THyperdimensionalResonanceEvolver;
+    public static final byte Mode_Default_HyperdimensionalResonanceEvolver = LazyGTNHConfigurations.Mode_Default_HyperdimensionalResonanceEvolver;
+    public static final int Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver = LazyGTNHConfigurations.Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver;
+    public static final int Parallel_HighParallelMode_HyperdimensionalResonanceEvolver = LazyGTNHConfigurations.Parallel_HighParallelMode_HyperdimensionalResonanceEvolver;
+    public static final int TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver = LazyGTNHConfigurations.TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver;
     // endregion
 
 }

@@ -55,7 +55,7 @@ public class HyperdimensionalResonanceEvolverRecipePool implements IRecipePool {
             .outputChances(500,100,2000,2000,2000,2000,500,5000,1000,2000,100,100,1000,2000,1000,500)
             .duration(20 * 600)
             .addTo(HRE);
-
+/*
         LZGT_RecipeBuilder
             .builder()
             .itemInputs(
@@ -70,7 +70,7 @@ public class HyperdimensionalResonanceEvolverRecipePool implements IRecipePool {
             .specialValue(11700)
             .eut(RECIPE_MAX)
             .duration(20 * 600)
-            .addTo(HRE);
+            .addTo(HRE);*/
 
     }
 

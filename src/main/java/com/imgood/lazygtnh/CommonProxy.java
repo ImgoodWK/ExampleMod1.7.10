@@ -1,17 +1,19 @@
 package com.imgood.lazygtnh;
 
+import com.imgood.lazygtnh.config.LazyGTNHConfigurations;
+
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 public class CommonProxy {
 
     // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
     // GameRegistry." (Remove if not needed)
     public void preInit(FMLPreInitializationEvent event) {
-        Config.synchronizeConfiguration(event.getSuggestedConfigurationFile());
-
+        LazyGTNHConfigurations.synchronizeConfiguration(event.getSuggestedConfigurationFile());
         LazyGTNH.LOG.info("LazyGTNH version: " + Tags.VERSION);
     }
 

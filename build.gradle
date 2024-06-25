@@ -7,3 +7,8 @@ minecraft {
     extraRunJvmArguments.add("-Xmx4G")
     extraRunJvmArguments.add("-Xms4G")
 }
+spotless {
+    java {
+        target '11'
+    }
+}

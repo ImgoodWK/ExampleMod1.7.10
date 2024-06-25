@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.Nxer.TwistSpaceTechnology.util.LanguageUtil0;
 import com.imgood.lazygtnh.LazyGTNH;
 
 /**
@@ -79,7 +78,7 @@ public class LZGTTextHandler {
     public static void initLangMap(Boolean isInDevMode) {
         if (isInDevMode) {
             /* Parse the .lang in LangMap */
-            LangMap = LanguageUtil0.parseLangFile("en_US");
+            LangMap = LanguageUtil.parseLangFile("en_US");
             // LangMapBackUp = new HashMap<String, String>(LangMap);
         }
 

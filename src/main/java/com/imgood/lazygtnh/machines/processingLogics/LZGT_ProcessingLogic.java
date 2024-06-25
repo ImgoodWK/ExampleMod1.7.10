@@ -2,7 +2,6 @@ package com.imgood.lazygtnh.machines.processingLogics;
 
 import javax.annotation.Nonnull;
 
-import com.Nxer.TwistSpaceTechnology.common.machine.multiMachineClasses.processingLogics.GTCM_ParallelHelper;
 
 import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.util.GT_ParallelHelper;
@@ -16,7 +15,7 @@ public class LZGT_ProcessingLogic extends ProcessingLogic {
 
     @Nonnull
     protected GT_ParallelHelper createParallelHelper(@Nonnull GT_Recipe recipe) {
-        return (new GTCM_ParallelHelper()).setRecipe(recipe)
+        return (new LZGT_ParallelHelper()).setRecipe(recipe)
             .setItemInputs(this.inputItems)
             .setFluidInputs(this.inputFluids)
             .setAvailableEUt(this.availableVoltage * this.availableAmperage)

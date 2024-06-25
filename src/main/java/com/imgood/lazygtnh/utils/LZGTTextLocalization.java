@@ -8,7 +8,6 @@ import net.minecraft.util.EnumChatFormatting;
 
 /**
  * Use {@link com.imgood.lazygtnh.utils.Enums}
- * <p>See <a href="https://github.com/Nxer/Twist-Space-Technology-Mod/pull/284">This PR: Use a preprocessor to help complete the creation of language files</a>
  */
 @Deprecated
 public class LZGTTextLocalization {
@@ -40,8 +39,8 @@ public class LZGTTextLocalization {
     public static final String textScrewdriverChangeMode = texter("Use screwdriver to change mode.", "textScrewdriverChangeMode");
     public static final String textFrontBottom = texter("Front bottom", "textFrontBottom");
     public static final String textUseBlueprint = texter("Use " + EnumChatFormatting.BLUE + "Blue" + EnumChatFormatting.AQUA + "print" + EnumChatFormatting.RESET + " to preview", "textUseBlueprint");
-    public static Object Waila_WirelessMode = texter("Wireless Mode", "Waila.General.WirelessMode");
-    public static Object Waila_CurrentEuCost = texter("Current EU Cost", "Waila.General.CurrentEuCost");
+    public static final String Waila_WirelessMode = texter("Wireless Mode", "Waila.General.WirelessMode");
+    public static final String Waila_CurrentEuCost = texter("Current EU Cost", "Waila.General.CurrentEuCost");
 }
 
 // spotless:on

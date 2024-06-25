@@ -1,5 +1,7 @@
 package com.imgood.lazygtnh;
 
+
+import com.imgood.lazygtnh.block.blockregister.RegistryBlocks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +44,7 @@ public class LazyGTNH {
         logger.info("Lazy GTNH preinitialization");
         LazyGTNHFeatures.preInit();
         LZGTTextHandler.initLangMap(isInDevMode);
+        RegistryBlocks.registryBlocks();
         proxy.preInit(event);
     }
 
@@ -65,7 +68,6 @@ public class LazyGTNH {
         MachineLoader.loadMachinePostInit();
         LZGTTextHandler.serializeLangMap(isInDevMode);
         LazyGTNHFeatures.init();
-
         proxy.postInit(event);
     }
 
@@ -77,7 +79,8 @@ public class LazyGTNH {
     @Mod.EventHandler
     public void onLoadCompleteEvent(FMLLoadCompleteEvent event) {
         // Your post-load initialization code here
-        logger.info("testmsgLoadc omplete test");
         RecipeLoader.loadRecipes();
     }
+
+
 }

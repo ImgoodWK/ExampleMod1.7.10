@@ -1,55 +1,41 @@
 package com.imgood.lazygtnh.machines;
 
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.transpose;
-import static com.imgood.lazygtnh.block.textures.TexturesGtBlock.HyperDimensionalResonanceEvolverField;
-import static com.imgood.lazygtnh.utils.LZGTTextLocalization.Tooltip_DoNotNeedMaintenance;
-import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_OFF;
-import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_ON;
-import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_FUSION1_GLOW;
-import static gregtech.api.enums.Textures.BlockIcons.casingTexturePages;
-import static gregtech.common.misc.WirelessNetworkManager.addEUToGlobalEnergyMap;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
 import javax.annotation.Nonnull;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.Nxer.TwistSpaceTechnology.util.TextLocalization;
-import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
-import com.gtnewhorizon.structurelib.structure.StructureDefinition;
+
+import com.imgood.lazygtnh.LazyGTNH;
+import com.imgood.lazygtnh.block.BasicBlocks;
+import com.imgood.lazygtnh.config.LazyGTNHConfigurations;
 import com.imgood.lazygtnh.machines.multiMachineClasses.LZGT_MultiMachineBase;
 import com.imgood.lazygtnh.machines.processingLogics.LZGT_ProcessingLogic;
-import com.imgood.lazygtnh.recipemap.LZGT_RecipeMap;
+import com.imgood.lazygtnh.recipemap.LZGT_Recipe;
 import com.imgood.lazygtnh.utils.LZGTTextHandler;
 import com.imgood.lazygtnh.utils.LZGTTextLocalization;
 import com.imgood.lazygtnh.utils.Utils;
+import static com.imgood.lazygtnh.utils.LZGTTextLocalization.Tooltip_DoNotNeedMaintenance;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.GT_HatchElement;
 import gregtech.api.enums.ItemList;
-import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -63,6 +49,18 @@ import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
 import gregtech.api.util.GT_OverclockCalculator;
 import gregtech.api.util.GT_Recipe;
 import gregtech.api.util.GT_Utility;
+import static gregtech.common.misc.WirelessNetworkManager.addEUToGlobalEnergyMap;
+import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_OFF;
+import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_ON;
+import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_FUSION1_GLOW;
+import static gregtech.api.enums.Textures.BlockIcons.casingTexturePages;
+
+import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
+import com.gtnewhorizon.structurelib.structure.StructureDefinition;
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.transpose;
+
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
@@ -87,6 +85,10 @@ public class LZGT_HyperdimensionalResonanceEvolver
 
     private int mCasing;
 
+    private boolean isRendering = true;
+
+    private boolean enableRender = LazyGTNHConfigurations.EnableRenderDefaultHyperdimensionalResonanceEvolver;
+
     public LZGT_HyperdimensionalResonanceEvolver(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
@@ -106,9 +108,9 @@ public class LZGT_HyperdimensionalResonanceEvolver
         super.getWailaBody(itemStack, currentTip, accessor, config);
         final NBTTagCompound tag = accessor.getNBTData();
         if (tag.getBoolean("isWirelessMode")) {
-            currentTip.add(EnumChatFormatting.LIGHT_PURPLE + TextLocalization.Waila_WirelessMode);
+            currentTip.add(EnumChatFormatting.LIGHT_PURPLE + LZGTTextLocalization.Waila_WirelessMode);
             currentTip.add(
-                EnumChatFormatting.AQUA + TextLocalization.Waila_CurrentEuCost
+                EnumChatFormatting.AQUA + LZGTTextLocalization.Waila_CurrentEuCost
                     + EnumChatFormatting.RESET
                     + ": "
                     + EnumChatFormatting.GOLD
@@ -214,46 +216,64 @@ public class LZGT_HyperdimensionalResonanceEvolver
     @Nonnull
     @Override
     public CheckRecipeResult checkProcessing() {
+        boolean flag = false;
+
         if (!isWirelessMode) {
+            if (this.getBaseMetaTileEntity().isActive() && this.maxProgresstime() != 0) {
+                this.isRendering = true;
+                if (this.enableRender && this.isRendering) {
+                    LazyGTNH.logger.info("testmsgend"+(this.enableRender && !this.isRendering)+this.enableRender+this.isRendering);
+                    this.createRenderBlock();
+                }
+            }else {
+                this.isRendering = false;
+                this.destroyRenderBlock();
+            }
             return super.checkProcessing();
         }
+        if (!flag) {
+            return CheckRecipeResultRegistry.NO_RECIPE;
+        } else {
+            setupProcessingLogic(processingLogic);
 
-        // wireless mode
-        setupProcessingLogic(processingLogic);
+            CheckRecipeResult result = doCheckRecipe();
+            result = postCheckRecipe(result, processingLogic);
+            // inputs are consumed at this point
+            updateSlots();
+            if (!result.wasSuccessful()) {
+                return result;
+            }
 
-        CheckRecipeResult result = doCheckRecipe();
-        result = postCheckRecipe(result, processingLogic);
-        // inputs are consumed at this point
-        updateSlots();
-        if (!result.wasSuccessful()) {
+            mEfficiency = 10000;
+            mEfficiencyIncrease = 10000;
+
+            if (processingLogic.getCalculatedEut() > Long.MAX_VALUE / processingLogic.getDuration()) {
+                // total eu cost has overflowed
+                costingWirelessEUTemp = 1145141919810L;
+                BigInteger finalCostEU = BigInteger.valueOf(-1)
+                    .multiply(BigInteger.valueOf(processingLogic.getCalculatedEut()))
+                    .multiply(BigInteger.valueOf(processingLogic.getDuration()));
+                if (!addEUToGlobalEnergyMap(ownerUUID, finalCostEU)) {
+                    return CheckRecipeResultRegistry.insufficientPower(1145141919810L);
+                }
+            } else {
+                // fine
+                costingWirelessEUTemp = processingLogic.getCalculatedEut() * processingLogic.getDuration();
+                if (!addEUToGlobalEnergyMap(ownerUUID, -costingWirelessEUTemp)) {
+                    return CheckRecipeResultRegistry.insufficientPower(costingWirelessEUTemp);
+                }
+            }
+            mMaxProgresstime = ValueEnum.TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver;
+
+            mOutputItems = processingLogic.getOutputItems();
+            mOutputFluids = processingLogic.getOutputFluids();
+
+
             return result;
         }
 
-        mEfficiency = 10000;
-        mEfficiencyIncrease = 10000;
+        // wireless mode
 
-        if (processingLogic.getCalculatedEut() > Long.MAX_VALUE / processingLogic.getDuration()) {
-            // total eu cost has overflowed
-            costingWirelessEUTemp = 1145141919810L;
-            BigInteger finalCostEU = BigInteger.valueOf(-1)
-                .multiply(BigInteger.valueOf(processingLogic.getCalculatedEut()))
-                .multiply(BigInteger.valueOf(processingLogic.getDuration()));
-            if (!addEUToGlobalEnergyMap(ownerUUID, finalCostEU)) {
-                return CheckRecipeResultRegistry.insufficientPower(1145141919810L);
-            }
-        } else {
-            // fine
-            costingWirelessEUTemp = processingLogic.getCalculatedEut() * processingLogic.getDuration();
-            if (!addEUToGlobalEnergyMap(ownerUUID, -costingWirelessEUTemp)) {
-                return CheckRecipeResultRegistry.insufficientPower(costingWirelessEUTemp);
-            }
-        }
-        mMaxProgresstime = ValueEnum.TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver;
-
-        mOutputItems = processingLogic.getOutputItems();
-        mOutputFluids = processingLogic.getOutputFluids();
-
-        return result;
     }
 
     @Override
@@ -265,7 +285,7 @@ public class LZGT_HyperdimensionalResonanceEvolver
 
     @Override
     public RecipeMap<?> getRecipeMap() {
-        return LZGT_RecipeMap.hyperdimensionalResonanceEvolverRecipes;
+        return LZGT_Recipe.HyperdimensionalResonanceEvolverRecipes;
     }
 
     @Override
@@ -339,6 +359,11 @@ public class LZGT_HyperdimensionalResonanceEvolver
         return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, horizontalOffSet, verticalOffSet, depthOffSet, elementBudget, env, false, true);
     }
 
+    @SideOnly(Side.CLIENT)
+    @Override
+    public boolean renderInWorld() {
+        return false;
+    }
     @Override
     public IStructureDefinition<LZGT_HyperdimensionalResonanceEvolver> getStructureDefinition() {
         if (STRUCTURE_DEFINITION == null) {
@@ -392,30 +417,11 @@ public class LZGT_HyperdimensionalResonanceEvolver
                 }))
                 //WTF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     .addElement('A', GT_HatchElementBuilder.<LZGT_HyperdimensionalResonanceEvolver>builder()
-                    .atLeast(new IHatchElement[]{GT_HatchElement.InputBus, GT_HatchElement.OutputBus})
-                    //.adder(<LZGT_HyperdimensionalResonanceEvolver::addToMachineList)
-                    .casingIndex(49)
+                    .atLeast(GT_HatchElement.InputBus, GT_HatchElement.OutputBus)
+                    .adder(LZGT_HyperdimensionalResonanceEvolver::addToMachineList)
+                    .casingIndex(12)
                     .dot(2)
                     .buildAndChain(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")), 12))
-                //.addElement('A', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")), 12))
-                /*.addElement('A', GT_StructureUtility.buildHatchAdder(LZGT_HyperdimensionalResonanceEvolver.class)
-                    .atLeast(new IHatchElement[]{
-                        GT_HatchElement.InputBus,
-                        GT_HatchElement.OutputBus,
-                        GT_HatchElement.Maintenance,
-                        GT_HatchElement.Energy,
-                        GT_HatchElement.Muffler,
-                        GT_HatchElement.InputHatch,
-                        GT_HatchElement.OutputHatch
-                    })
-                    .casingIndex(CASING_INDEX1)
-                    .dot(1)
-                    .buildAndChain(new IStructureElement[]{
-                        StructureUtility.onElementPass((x) -> {
-                            ++x.mCasing;
-                        }, StructureUtility.ofBlock(ModBlocks.blockCasings3Misc, 2))
-                    })
-                )*/
                 .addElement('B', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")),13))
                 .addElement('C', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings")),14))
                 .addElement('D', ofBlock(Objects.requireNonNull(Block.getBlockFromName("gregtech:gt.blockcasings5")),13))
@@ -435,15 +441,6 @@ public class LZGT_HyperdimensionalResonanceEvolver
 
 
 
-/*
-Blocks:
-A -> ofBlock...(MAR_Casing, 0, ...);
-B -> ofBlock...(gt.blockcasings, 11, ...);
-C -> ofBlock...(gt.blockcasings2, 1, ...); // io hatches
-D -> ofBlock...(gt.blockcasings2, 8, ...);
-E -> ofBlock...(gt.blockcasings8, 3, ...); // energy hatch
-F -> ofFrame...(Materials.NaquadahAlloy);
- */
 
     // spotless:on
     // endregion
@@ -491,6 +488,25 @@ F -> ofFrame...(Materials.NaquadahAlloy);
         return tt;
     }
 
+    public void createRenderBlock() {
+        int x = this.getBaseMetaTileEntity().getXCoord();
+        int y = this.getBaseMetaTileEntity().getYCoord();
+        int z = this.getBaseMetaTileEntity().getZCoord();
+        double xOffset = (double)(10 * this.getExtendedFacing().getRelativeBackInWorld().offsetX + 33 * this.getExtendedFacing().getRelativeUpInWorld().offsetX);
+        double zOffset = (double)(10 * this.getExtendedFacing().getRelativeBackInWorld().offsetZ + 33 * this.getExtendedFacing().getRelativeUpInWorld().offsetZ);
+        double yOffset = (double)(10 * this.getExtendedFacing().getRelativeBackInWorld().offsetY + 33 * this.getExtendedFacing().getRelativeUpInWorld().offsetY);
+        this.getBaseMetaTileEntity().getWorld().setBlock((int)((double)x + xOffset), (int)((double)y + yOffset), (int)((double)z + zOffset), Blocks.air);
+        this.getBaseMetaTileEntity().getWorld().setBlock((int)((double)x + xOffset), (int)((double)y + yOffset), (int)((double)z + zOffset), BasicBlocks.Block_HRERender);
+    }
+    public void destroyRenderBlock() {
+        int x = this.getBaseMetaTileEntity().getXCoord();
+        int y = this.getBaseMetaTileEntity().getYCoord();
+        int z = this.getBaseMetaTileEntity().getZCoord();
+        double xOffset = (double)(10 * this.getExtendedFacing().getRelativeBackInWorld().offsetX + 33 * this.getExtendedFacing().getRelativeUpInWorld().offsetX);
+        double zOffset = (double)(10 * this.getExtendedFacing().getRelativeBackInWorld().offsetZ + 33 * this.getExtendedFacing().getRelativeUpInWorld().offsetZ);
+        double yOffset = (double)(10 * this.getExtendedFacing().getRelativeBackInWorld().offsetY + 33 * this.getExtendedFacing().getRelativeUpInWorld().offsetY);
+        this.getBaseMetaTileEntity().getWorld().setBlock((int)((double)x + xOffset), (int)((double)y + yOffset), (int)((double)z + zOffset), Blocks.air);
+    }
     @Override
     public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection aFacing,
         int colorIndex, boolean aActive, boolean redstoneLevel) {
@@ -523,6 +539,7 @@ F -> ofFrame...(Materials.NaquadahAlloy);
         return rTexture;
     }
 
+    /*
     @SideOnly(Side.CLIENT)
     private void renderField(double x, double y, double z, int side, double minU, double maxU, double minV,
         double maxV) {
@@ -627,16 +644,15 @@ F -> ofFrame...(Materials.NaquadahAlloy);
                 tes.addVertexWithUV(x + 3.0, y, z - 7.0, maxU, maxV);
         }
 
-    }
+    }*/
 
-    @Override
+    /*@Override
     @SideOnly(Side.CLIENT)
     public boolean renderInWorld(IBlockAccess aWorld, int x, int y, int z, Block block, RenderBlocks renderer) {
         Tessellator tes = Tessellator.instance;
         IIcon hre = HyperDimensionalResonanceEvolverField.getIcon();
 
-        // if (this.getBaseMetaTileEntity().isActive()) {
-        if (true) {
+        if (this.getBaseMetaTileEntity().isActive()) {
             double minU = (double) hre.getMinU();
             double maxU = (double) hre.getMaxU();
             double minV = (double) hre.getMinV();
@@ -724,5 +740,5 @@ F -> ofFrame...(Materials.NaquadahAlloy);
 
         return false;
     }
-
+*/
 }

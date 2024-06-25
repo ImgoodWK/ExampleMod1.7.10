@@ -4,307 +4,40 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import net.minecraft.item.ItemDye;
+import com.imgood.lazygtnh.LazyGTNH;
+
 import net.minecraftforge.common.config.Configuration;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.imgood.lazygtnh.LazyGTNHFeatures;
 
-import team.chisel.Chisel;
-import team.chisel.ctmlib.CTM;
+import java.io.File;
+import java.math.BigInteger;
+
 
 public class LazyGTNHConfigurations {
 
     public static Configuration config;
+    public static boolean activateCombatStats;
+    public static final String HyperdimensionalResonanceEvolver = "HyperdimensionalResonanceEvolver";
+    public static double secondsOfHyperdimensionalResonanceProgressCycleTime = 64.0;
+    public static boolean EnableRenderDefaultHyperdimensionalResonanceEvolver = true;
 
-    public static boolean configExists;
-
-    public static double concreteVelocityMult;
-    public static boolean ghostCloud;
-    public static int factoryBlockAmount;
-    public static boolean allowMossy;
-    public static boolean allowSmoothStone;
-    public static boolean chiselRecipe;
-    public static boolean enableFMP;
-    public static boolean chiselStoneToCobbleBricks;
-    public static boolean chiselBackToVanillaLeaves;
-    public static boolean canMobsSpawnOnTheChiselBlocks;
-
-    public static int marbleAmount;
-    public static int limestoneAmount;
-    public static int graniteAmount;
-    public static int dioriteAmount;
-    public static int andesiteAmount;
-
-    public static int particlesTickrate;
-    public static boolean oldPillars;
-    public static boolean disableCTM;
-    public static boolean connectInsideCTM;
-    public static boolean blockDescriptions;
-    public static boolean imTooGoodForDescriptions;
-
-    public static boolean allowChiselDamage;
-    public static int ironChiselMaxDamage;
-    public static int diamondChiselMaxDamage;
-    public static int obsidianChiselMaxDamage;
-    public static int netherStarChiselMaxDamage;
-    public static boolean ironChiselCanLeftClick;
-    public static boolean ironChiselHasModes;
-    public static int ironChiselAttackDamage;
-    public static int diamondChiselAttackDamage;
-    public static int obsidianChiselAttackDamage;
-    public static int netherStarChiselAttackDamage;
-    public static boolean allowChiselCrossColors;
-
-    public static boolean useRoadLineTool;
-    public static String getRoadLineTool;
-    public static int roadLineToolLevel;
-
-    public static int[] configColors = new int[ItemDye.field_150923_a.length];
-
-    public static boolean fullBlockConcrete;
-
+    //common blocks
     public static Map<String, Boolean> features = new HashMap<>();
+    public static byte Mode_Default_HyperdimensionalResonanceEvolver;
+    public static int Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver;
+    public static int Parallel_HighParallelMode_HyperdimensionalResonanceEvolver;
+    public static int TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver;
 
+    //common blocks
     public static boolean refreshConfig() {
 
-        String category;
-
-        /* general */
-        category = "general";
-        concreteVelocityMult = config
-            .get(
-                category,
-                "concreteVelocityMult",
-                1.35,
-                "The factor that concrete increases your velocity. Default is 1.35, set to 1 for no change.")
-            .getDouble();
-        fullBlockConcrete = config
-            .get(
-                category,
-                "fullBlockConcrete",
-                false,
-                "Should concrete be a full block. This will also unavoidably disable speed increase if set to true.")
-            .getBoolean(false);
-        ghostCloud = config.get(category, "doesCloudRenderLikeGhost", true)
-            .getBoolean(true);
-        factoryBlockAmount = config.get(category, "amountYouGetFromFactoryBlockCrafting", 32)
-            .getInt(32);
-        allowMossy = config
-            .get(
-                category,
-                "allowBrickToMossyInChisel",
-                true,
-                "If true, you can chisel stone brick to mossy stone brick.")
-            .getBoolean(true);
-        allowSmoothStone = config.get(category, "allowSmoothStoneToStoneBricksAndBack", true)
-            .getBoolean(true);
-        chiselRecipe = config
-            .get(category, "chiselAlternateRecipe", false, "Use alternative crafting recipe for the chisel")
-            .getBoolean(false);
-        enableFMP = config.get(category, "enableFMP", true, "Do you want to enable FMP")
-            .getBoolean(true);
-        chiselStoneToCobbleBricks = config
-            .get(
-                category,
-                "chiselStoneToCobbleBricks",
-                true,
-                "Chisel stone to cobblestone and bricks by left clicking.")
-            .getBoolean(false);
-        chiselBackToVanillaLeaves = config.get(
-            category,
-            "chiselBackToVanillaLeaves",
-            false,
-            "If this is true, you can chisel from the chisel leaves back to vanilla ones. If it is false, you cannot.")
-            .getBoolean(false);
-        canMobsSpawnOnTheChiselBlocks = config
-            .get(category, "canMobsSpawnOnTheChiselBlocks", false, "Can mobs Spawn on the Chisel Blocks")
-            .getBoolean();
-
-        /* worldgen */
-        category = "worldgen";
-        marbleAmount = config
-            .get(category, "marbleAmount", 7, "Amount of marble to generate in the world; use 0 for none")
-            .getInt(7);
-        limestoneAmount = config
-            .get(category, "limestoneAmount", 8, "Amount of limestone to generate in the world; use 0 for none")
-            .getInt(8);
-        graniteAmount = config
-            .get(category, "graniteAmount", 8, "Amount of granite to generate in the world; use 0 for none.")
-            .getInt(8);
-        dioriteAmount = config
-            .get(category, "dioriteAmount", 8, "Amount of diorite to generate in the world; use 0 for none.")
-            .getInt(8);
-        andesiteAmount = config
-            .get(category, "andesiteAmount", 8, "Amount of andesite to generate in the world; use 0 for none.")
-            .getInt(8);
-
-        /* client */
-        category = "client";
-        particlesTickrate = config
-            .get(category, "particleTickrate", 1, "Particle tick rate. Greater value = less particles.")
-            .getInt(1);
-        oldPillars = config.get(category, "pillarOldGraphics", false, "Use old pillar textures")
-            .getBoolean(false);
-        disableCTM = !config.get(category, "connectedTextures", true, "Enable connected textures")
-            .getBoolean(true);
-        CTM.disableObscuredFaceCheckConfig = connectInsideCTM = config
-            .get(
-                category,
-                "connectInsideCTM",
-                false,
-                "Choose whether the inside corner is disconnected on a CTM block - http://imgur.com/eUywLZ4")
-            .getBoolean(false);
-        blockDescriptions = config
-            .get(
-                category,
-                "tooltipsUseBlockDescriptions",
-                true,
-                "Make variations of blocks have the same name, and use the description in tooltip to distinguish them.")
-            .getBoolean(true);
-        imTooGoodForDescriptions = config
-            .get(
-                category,
-                "imTooGoodForBlockDescriptions",
-                false,
-                "For those people who just hate block descriptions on the world gen!")
-            .getBoolean();
-
-        /* chisel */
-        category = "chisel";
-        allowChiselDamage = config
-            .get(
-                category,
-                "allowChiselDamage",
-                true,
-                "Should the chisel be damageable and take damage when it chisels something.")
-            .getBoolean();
-        ironChiselMaxDamage = config.getInt(
-            "ironChiselMaxDamage",
-            category,
-            500,
-            1,
-            Short.MAX_VALUE,
-            "The max damage of the standard iron chisel.");
-        diamondChiselMaxDamage = config.getInt(
-            "diamondChiselMaxDamage",
-            category,
-            5000,
-            1,
-            Short.MAX_VALUE,
-            "The max damage of the diamond chisel.");
-        obsidianChiselMaxDamage = config.getInt(
-            "obsidianChiselMaxDamage",
-            category,
-            2500,
-            1,
-            Short.MAX_VALUE,
-            "The max damage of the obsidian chisel.");
-        netherStarChiselMaxDamage = config.getInt(
-            "netherStarChiselMaxDamage",
-            category,
-            32767,
-            1,
-            Short.MAX_VALUE,
-            "The max damage of the nether star chisel.");
-        ironChiselCanLeftClick = config
-            .get(
-                category,
-                "ironChiselCanLeftClick",
-                true,
-                "If this is true, the iron chisel can left click chisel blocks. If false, it cannot.")
-            .getBoolean();
-        ironChiselHasModes = config
-            .get(
-                category,
-                "ironChiselHasModes",
-                false,
-                "If this is true, the iron chisel can change its chisel mode just as the diamond chisel can.")
-            .getBoolean();
-        allowChiselCrossColors = config
-            .get(
-                category,
-                "allowChiselCrossColors",
-                true,
-                "Should someone be able to chisel something into a different color.")
-            .getBoolean();
-
-        ironChiselAttackDamage = config.get(
-            category,
-            "ironChiselAttackDamage",
-            2,
-            "The extra attack damage points (in half hearts) that the iron chisel inflicts when it is used to attack an entity.")
-            .getInt();
-        diamondChiselAttackDamage = config.get(
-            category,
-            "diamondChiselAttackDamage",
-            2,
-            "The extra attack damage points (in half hearts) that the diamond chisel inflicts when it is used to attack an entity.")
-            .getInt();
-        obsidianChiselAttackDamage = config.get(
-            category,
-            "obsidianChiselAttackDamage",
-            4,
-            "The extra attack damage points (in half hearts) that the obsidian chisel inflicts when it is used to attack an entity.")
-            .getInt();
-        netherStarChiselAttackDamage = config.get(
-            category,
-            "netherStarChiselAttackDamage",
-            6,
-            "The extra attack damage points (in half hearts) that the nether star chisel inflicts when it is used to attack an entity.")
-            .getInt();
-
-        /* block */
-        category = "block";
-        useRoadLineTool = config
-            .get(
-                category,
-                "useRoadLineTool",
-                false,
-                "Should the road line require a tool to break (If false, road lines can be broken in Adventure)")
-            .getBoolean();
-        getRoadLineTool = config
-            .get(
-                category,
-                "getRoadLineTool",
-                "pickaxe",
-                "The tool that is able to break roadLines (requires useRoadLineTool to be true to take effect)")
-            .getString();
-        roadLineToolLevel = config.get(
-            category,
-            "roadLineToolLevel",
-            0,
-            "The lowest harvest level of the tool able to break the road lines (requires useRoadLineTool to be true to take effect) (0 = Wood/Gold, 1 = Stone, 2 = Iron, 3 = Diamond) Default: 0")
-            .getInt();
-
-        /* hexColors */
-        category = "hexColors";
-
-        for (int i = 0; i < ItemDye.field_150923_a.length; i++) {
-            // tterrag... don't kill me over this formatting.
-            String temp = config
-                .get(
-                    category,
-                    "hex" + ItemDye.field_150923_a[i],
-                    "#" + Integer.toHexString(ItemDye.field_150922_c[i]),
-                    Character.toUpperCase(ItemDye.field_150923_a[i].charAt(0)) + ItemDye.field_150923_a[i].substring(1)
-                        + " color for hex block overlay #RRGGBB")
-                .getString();
-            // Or this
-            try {
-                configColors[i] = Integer.decode(temp);
-            } catch (NumberFormatException e) {
-                Chisel.logger.warn(
-                    "Configuration error, " + temp
-                        + " was not recognized as a color.  Using default: #"
-                        + Integer.toHexString(ItemDye.field_150922_c[i]));
-                configColors[i] = ItemDye.field_150922_c[i];
-            }
-        }
-
-        /* features */
+            /* features */
+        LazyGTNH.logger.info("Put block feature in config file...");
         for (LazyGTNHFeatures feature : LazyGTNHFeatures.values()) {
+            LazyGTNH.logger.info("Put" + feature + "in config file.");
             features.put(
                 featureName(feature),
                 config.get("features", featureName(feature), true)
@@ -312,15 +45,18 @@ public class LazyGTNHConfigurations {
         }
 
         if (config.hasChanged()) {
+            LazyGTNH.logger.info("Config file has changed,saving config...");
             config.save();
         }
         return true;
     }
-
+    //common blocks
     public static boolean featureEnabled(LazyGTNHFeatures feature) {
-        return features.getOrDefault(featureName(feature), false);
+        boolean enabled = features.getOrDefault(featureName(feature), false);
+        LazyGTNH.logger.info(feature + " is " + (enabled ? "enabled" : "disabled."));
+        return enabled;
     }
-
+//common blocks
     /**
      * Makes the old camelCase names from the new CONSTANT_CASE names
      */
@@ -338,9 +74,36 @@ public class LazyGTNHConfigurations {
         }
         return ret;
     }
-
+//common blocks
     @Deprecated
     public static boolean featureEnabled(String feature) {
         return false;
+    }
+
+    public static void synchronizeConfiguration(File configFile) {
+        LazyGTNH.logger.info("Synchronizing configuration...");
+        Configuration configuration = new Configuration(configFile);
+        secondsOfHyperdimensionalResonanceProgressCycleTime = Double.parseDouble(configuration.getString("secondsOfHyperdimensionalResonanceProgressCycleTime",
+            HyperdimensionalResonanceEvolver,String.valueOf(secondsOfHyperdimensionalResonanceProgressCycleTime),"Seconds of HyperdimensionalResonance one progress time. Type: double, turn to tick time."));
+        EnableRenderDefaultHyperdimensionalResonanceEvolver = configuration.getBoolean("EnableRenderDefaultHyperdimensionalResonanceEvolver", HyperdimensionalResonanceEvolver, EnableRenderDefaultHyperdimensionalResonanceEvolver, "Enable Render of Hyperdimensional Resonance Evolver when placing a new one.");
+
+        activateCombatStats = configuration.getBoolean("activateCombatStats", "CombatStats", activateCombatStats, "decide whether to enable the combatstats system(WIP).DO NOT USE IT FOR NOW!");
+        Mode_Default_HyperdimensionalResonanceEvolver = (byte)configuration.getInt("Mode_Default_HyperdimensionalResonanceEvolver", "HyperdimensionalResonanceEvolver", Mode_Default_HyperdimensionalResonanceEvolver, 0, 1, "The default mode when deploy HyperdimensionalResonanceEvolver. 0=HighSpeedMode, 1=HighParallelMode. Type: byte");
+        if (Mode_Default_HyperdimensionalResonanceEvolver < 0 || Mode_Default_HyperdimensionalResonanceEvolver > 1) {
+            Mode_Default_HyperdimensionalResonanceEvolver = 0;
+        }
+        Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver = configuration.getInt("Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver", "HyperdimensionalResonanceEvolver", Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver, 1, Integer.MAX_VALUE, "Max Parallel of Hyperdimensional Resonance Evolver high speed mode. Type: int");
+        TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver = configuration.getInt("TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver", "HyperdimensionalResonanceEvolver", TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver, 1, 16384, "How many ticks per progressing cost in Wireless mode of Hyperdimensional Resonance Evolver. Type: int");
+        LazyGTNH.logger.info("Synchronize configuration finished.");
+        if (configuration.hasChanged()) {
+            configuration.save();
+        }
+    }
+    static {
+        activateCombatStats = false;
+        Mode_Default_HyperdimensionalResonanceEvolver = 0;
+        Parallel_HighSpeedMode_HyperdimensionalResonanceEvolver = 1024;
+        Parallel_HighParallelMode_HyperdimensionalResonanceEvolver = Integer.MAX_VALUE;
+        TickPerProgressing_WirelessMode_HyperdimensionalResonanceEvolver = 128;
     }
 }

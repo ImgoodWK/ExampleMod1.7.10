@@ -57,8 +57,8 @@ public class LZGT_ParallelHelper extends GT_ParallelHelper {
     private boolean built;
     private double durationMultiplier;
     private float eutModifier = 1.0F;
-    private GT_ParallelHelper.MaxParallelCalculator maxParallelCalculator = com.Nxer.TwistSpaceTechnology.common.machine.multiMachineClasses.processingLogics.GTCM_ParallelHelper::maxParallelCalculatedByInputs;
-    private GT_ParallelHelper.InputConsumer inputConsumer = com.Nxer.TwistSpaceTechnology.common.machine.multiMachineClasses.processingLogics.GTCM_ParallelHelper::consumeInput;
+    private GT_ParallelHelper.MaxParallelCalculator maxParallelCalculator = LZGT_ParallelHelper::maxParallelCalculatedByInputs;
+    private GT_ParallelHelper.InputConsumer inputConsumer = LZGT_ParallelHelper::consumeInput;
     private GT_OverclockCalculator calculator;
     private CheckRecipeResult result;
     private Function<Integer, ItemStack[]> customItemOutputCalculation;
